@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { supabase } from '@/lib/supabase';
 import styles from './admin.module.css';
+import { CAFE_NAMES } from '@/lib/cafe-names';
 
 type ConsultationStatus = '상담대기' | '상담중' | '보류' | '등록대기' | '등록완료';
 
@@ -41,20 +42,8 @@ export default function AdminPage() {
   const [counselCheckText, setCounselCheckText] = useState('');
   const [counselCheckEtcInput, setCounselCheckEtcInput] = useState('');
   const [activeTab, setActiveTab] = useState<'consultations' | 'tracking'>('consultations');
-  const defaultCafes = [
-    { id: 'cjsam', name: '순광맘' },
-    { id: 'chobomamy', name: '러브양산맘' },
-    { id: 'jinhaemam', name: '창원진해댁' },
-    { id: 'momspanggju', name: '광주맘스팡' },
-    { id: 'cjasm', name: '충주아사모' },
-    { id: 'mygodsend', name: '화성남양애' },
-    { id: 'yul2moms', name: '율하맘' },
-    { id: 'chbabymom', name: '춘천맘' },
-    { id: 'seosanmom', name: '서산맘' },
-    { id: 'redog2oi', name: '부천소사구' },
-    { id: 'ksn82599', name: '둔산맘' },
-  ];
-  const [cafes, setCafes] = useState(defaultCafes);
+  const [cafes, setCafes] = useState<{ id: string; name: string; type: string }[]>([]);
+  const [cafesLoading, setCafesLoading] = useState(false);
   const [newCafeName, setNewCafeName] = useState('');
   const [newCafeId, setNewCafeId] = useState('');
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -156,35 +145,44 @@ export default function AdminPage() {
     }
   };
 
-  // 카페 목록 localStorage 로드
-  useEffect(() => {
-    const saved = localStorage.getItem('baro_cafes');
-    if (saved) {
-      try { setCafes(JSON.parse(saved)); } catch {}
-    }
-  }, []);
-
-  const saveCafes = (updated: typeof cafes) => {
-    setCafes(updated);
-    localStorage.setItem('baro_cafes', JSON.stringify(updated));
+  // 카페 목록 DB 로드
+  const fetchCafes = async () => {
+    setCafesLoading(true);
+    try {
+      const res = await fetch('/api/channels?type=mamcafe');
+      const data = await res.json();
+      if (Array.isArray(data)) setCafes(data);
+    } catch {}
+    setCafesLoading(false);
   };
 
-  const handleAddCafe = (e?: React.MouseEvent | React.KeyboardEvent) => {
+  useEffect(() => {
+    fetchCafes();
+  }, []);
+
+  const handleAddCafe = async (e?: React.MouseEvent | React.KeyboardEvent) => {
     e?.preventDefault();
     const name = newCafeName.trim();
     const id = newCafeId.trim().replace(/\s/g, '');
     if (!name) { alert('카페 이름을 입력해주세요.'); return; }
     if (!id) { alert('카페 ID를 입력해주세요.'); return; }
-    if (cafes.some(c => c.id === id)) { alert('이미 존재하는 카페 ID입니다.'); return; }
-    saveCafes([...cafes, { id, name }]);
+    const res = await fetch('/api/channels', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, name, type: 'mamcafe' }),
+    });
+    if (res.status === 409) { alert('이미 존재하는 카페 ID입니다.'); return; }
+    if (!res.ok) { alert('추가에 실패했습니다.'); return; }
     setNewCafeName('');
     setNewCafeId('');
     setShowAddCafeModal(false);
+    fetchCafes();
   };
 
-  const handleDeleteCafe = (id: string) => {
+  const handleDeleteCafe = async (id: string) => {
     if (!confirm('삭제하시겠습니까?')) return;
-    saveCafes(cafes.filter(c => c.id !== id));
+    await fetch(`/api/channels?id=${encodeURIComponent(id)}`, { method: 'DELETE' });
+    fetchCafes();
   };
 
   const lookupCafeName = async (id: string) => {
@@ -236,20 +234,8 @@ export default function AdminPage() {
     }
   };
 
-  // 카페 ID → 이름 매핑 (page.tsx와 동일하게 유지)
-  const cafeIdToName: Record<string, string> = {
-    mygodsend: '화성남양애',
-    yul2moms: '율하맘',
-    chbabymom: '춘천맘',
-    seosanmom: '서산맘',
-    redog2oi: '부천소사구',
-    cjsam: '순광맘',
-    chobomamy: '러브양산맘',
-    jinhaemam: '창원진해댁',
-    momspanggju: '광주맘스팡',
-    cjasm: '충주아사모',
-    ksn82599: '둔산맘',
-  };
+  // 카페 ID → 이름 매핑 (추적링크 관리 탭의 cafes 상태에서 자동 생성)
+  const cafeIdToName: Record<string, string> = Object.fromEntries(cafes.map(c => [c.id, c.name]));
 
   // 특수 케이스: 언더스코어 없이 저장된 값의 대분류/중분류 매핑
   const specialSourceMappings: Record<string, { major: string; minor: string }> = {
@@ -995,6 +981,7 @@ export default function AdminPage() {
       {/* 추적링크 탭 */}
       {activeTab === 'tracking' && (
         <div className={styles.trackingContainer}>
+          {cafesLoading && <div className={styles.loading}>로딩 중...</div>}
           <div className={styles.trackingToolbar}>
             <input
               type="text"
@@ -1074,9 +1061,9 @@ export default function AdminPage() {
                   value={newCafeId}
                   onChange={e => {
                     const val = e.target.value;
-                    if (val.includes('cafe.naver.com/')) {
-                      const extracted = val.split('cafe.naver.com/')[1]?.split('/')[0]?.split('?')[0] || '';
-                      setNewCafeId(extracted);
+                    const match = val.match(/(?:https?:\/\/)?(?:m\.)?cafe\.naver\.com\/([a-zA-Z0-9_]+)/);
+                    if (match) {
+                      setNewCafeId(match[1]);
                     } else {
                       setNewCafeId(val.trim());
                     }

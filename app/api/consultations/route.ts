@@ -1,6 +1,24 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { supabaseAdmin } from '@/lib/supabase/server';
 import { sendConsultationEmail } from '@/lib/email';
+import { formatClickSource as formatClickSourceStatic } from '@/lib/cafe-names';
+
+async function formatClickSourceFromDB(clickSource: string | null): Promise<string> {
+  if (!clickSource) return '미입력';
+  try {
+    const { data } = await supabaseAdmin.from('channels').select('id, name');
+    const map: Record<string, string> = Object.fromEntries((data || []).map((c: { id: string; name: string }) => [c.id, c.name]));
+    const stripped = clickSource.startsWith('바로폼_') ? clickSource.slice(4) : clickSource;
+    const idx = stripped.indexOf('_');
+    if (idx === -1) return stripped;
+    const major = stripped.slice(0, idx);
+    const rawMinor = stripped.slice(idx + 1);
+    const minor = map[rawMinor] || rawMinor;
+    return `${major} > ${minor}`;
+  } catch {
+    return formatClickSourceStatic(clickSource);
+  }
+}
 
 // Vercel Serverless 함수 타임아웃 설정 (초 단위)
 export const maxDuration = 90;
@@ -216,7 +234,7 @@ export async function POST(request: NextRequest) {
                 },
                 {
                   type: 'mrkdwn',
-                  text: `*유입경로:*\n${click_source || '미입력'}`,
+                  text: `*유입경로:*\n${await formatClickSourceFromDB(click_source)}`,
                 },
               ],
             },
