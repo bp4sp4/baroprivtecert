@@ -11,6 +11,11 @@ export const CAFE_NAMES: Record<string, string> = {
   seosanmom: '서산맘',
   redog2oi: '부천소사구',
   ksn82599: '둔산맘',
+  magic26: '안평맘스비',
+  anjungmom: '평택안포맘',
+  tlgmdaka0: '시맘수',
+  babylovecafe: '베이비러브',
+  naese: '중리사랑방',
 };
 
 export function resolveCafeName(cafeId: string): string {

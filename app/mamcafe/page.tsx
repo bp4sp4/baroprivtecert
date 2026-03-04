@@ -7,9 +7,7 @@ export default function MamcafeRedirect() {
   const router = useRouter();
 
   useEffect(() => {
-    router.replace(
-      "/?utm_source=mamcafe&utm_medium=cafe&utm_campaign=recruitment"
-    );
+    router.replace("/");
   }, [router]);
 
   return (

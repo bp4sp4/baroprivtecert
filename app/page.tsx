@@ -77,14 +77,40 @@ function ClickSourceHandler({
       );
       onSourceChange(formatted);
     } else {
-      // UTM 없을 때 referrer로 네이버카페 감지
+      // referrer로 네이버카페 감지
       const referrer = document.referrer;
       if (referrer.includes("cafe.naver.com/redog2oi")) {
         onSourceChange("맘카페_부천소사구");
-      } else if (referrer.includes("cafe.naver.com/babylovecafe") || referrer.includes("cafes/12688726")) {
-        onSourceChange("맘카페_양주시맘카페");
+      } else if (referrer.includes("cafe.naver.com/babylovecafe")) {
+        onSourceChange("맘카페_베이비러브");
       } else if (referrer.includes("cafe.naver.com/magic26")) {
-        onSourceChange("맘카페_안평맘카페");
+        onSourceChange("맘카페_안평맘스비");
+      } else if (referrer.includes("cafe.naver.com/chobomamy")) {
+        onSourceChange("맘카페_러브양산맘");
+      } else if (referrer.includes("cafe.naver.com/jinhaemam")) {
+        onSourceChange("맘카페_창원진해댁");
+      } else if (referrer.includes("cafe.naver.com/momspanggju")) {
+        onSourceChange("맘카페_광주맘스팡");
+      } else if (referrer.includes("cafe.naver.com/cjasm")) {
+        onSourceChange("맘카페_충주아사모");
+      } else if (referrer.includes("cafe.naver.com/yul2moms")) {
+        onSourceChange("맘카페_율하맘");
+      } else if (referrer.includes("cafe.naver.com/chbabymom")) {
+        onSourceChange("맘카페_춘천맘");
+      } else if (referrer.includes("cafe.naver.com/ksn82599")) {
+        onSourceChange("맘카페_둔산맘");
+      } else if (referrer.includes("cafe.naver.com/anjungmom")) {
+        onSourceChange("맘카페_평택안포맘");
+      } else if (referrer.includes("cafe.naver.com/tlgmdaka0")) {
+        onSourceChange("맘카페_시맘수");
+      } else if (referrer.includes("cafe.naver.com/naese")) {
+        onSourceChange("맘카페_중리사랑방");
+      } else if (referrer.includes("cafe.naver.com/mygodsend")) {
+        onSourceChange("맘카페_화성남양애");
+      } else if (referrer.includes("cafe.naver.com/cjsam")) {
+        onSourceChange("맘카페_순광맘");
+      } else if (referrer.includes("cafe.naver.com/seosanmom")) {
+        onSourceChange("맘카페_서산맘");
       } else if (referrer.includes("cafe.naver.com")) {
         onSourceChange("네이버카페_referrer");
       }

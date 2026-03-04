@@ -8,18 +8,8 @@ export default function MamcafeRedirect() {
   const params = useParams();
 
   useEffect(() => {
-    const cafeId = params.id as string;
-
-    if (cafeId) {
-      router.replace(
-        `/?utm_source=mamcafe&utm_medium=cafe&utm_campaign=cafe_${cafeId}&cafe_id=${cafeId}`
-      );
-    } else {
-      router.replace(
-        "/?utm_source=mamcafe&utm_medium=cafe&utm_campaign=recruitment"
-      );
-    }
-  }, [router, params]);
+    router.replace("/");
+  }, [router]);
 
   return (
     <div className="min-h-screen flex items-center justify-center">
