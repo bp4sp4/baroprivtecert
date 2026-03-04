@@ -89,7 +89,7 @@ function ClickSourceHandler({
         onSourceChange("맘카페_러브양산맘");
       } else if (referrer.includes("cafe.naver.com/jinhaemam")) {
         onSourceChange("맘카페_창원진해댁");
-      } else if (referrer.includes("cafe.naver.com/momspanggju")) {
+      } else if (referrer.includes("cafe.naver.com/momspanggju") || referrer.includes("cafes/26025763")) {
         onSourceChange("맘카페_광주맘스팡");
       } else if (referrer.includes("cafe.naver.com/cjasm")) {
         onSourceChange("맘카페_충주아사모");
