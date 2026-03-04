@@ -75,7 +75,7 @@ export async function POST(request: NextRequest) {
     }
 
     const body = await request.json();
-    const { name, contact, education, hope_course, reason, click_source, is_manual_entry, residence } = body;
+    const { name, contact, education, hope_course, major_category, reason, click_source, is_manual_entry, residence } = body;
 
     // 유효성 검사 - 이름과 연락처만 필수
     if (!name || !contact) {
@@ -94,6 +94,7 @@ export async function POST(request: NextRequest) {
           contact,
           education: education || null,
           hope_course: hope_course || null,
+          major_category: major_category || null,
           reason: reason || null,
           click_source: click_source || null,
           residence: residence || null,
