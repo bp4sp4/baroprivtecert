@@ -353,7 +353,8 @@ export default function AdminPage() {
   const parseClickSource = (source: string | null) => {
     if (!source) return { major: '', minor: '', display: '-' };
     // 바로폼_ 접두사 제거
-    const stripped = source.startsWith('바로폼_') ? source.slice(4) : source;
+    const isBaro = source.startsWith('바로폼_');
+    const stripped = isBaro ? source.slice(4) : source;
     // 특수 케이스 매핑 확인
     if (specialSourceMappings[stripped]) {
       const { major, minor } = specialSourceMappings[stripped];
@@ -362,7 +363,8 @@ export default function AdminPage() {
     // 첫 번째 _ 기준으로 대분류 / 중분류 분리
     const underscoreIdx = stripped.indexOf('_');
     if (underscoreIdx === -1) {
-      return { major: stripped, minor: '', display: stripped };
+      const minor = stripped === '당근' ? '바로폼' : '';
+      return { major: stripped, minor, display: stripped };
     }
     const major = stripped.slice(0, underscoreIdx);
     const rawMinor = stripped.slice(underscoreIdx + 1);
@@ -870,6 +872,27 @@ export default function AdminPage() {
     )
   ).sort() as string[];
 
+  // 등록률 통계
+  const HAKJEOM_MANAGERS = ['이규준', '김하준'];
+  const calcRegRate = (list: Consultation[]) => {
+    const total = list.length;
+    const registered = list.filter(c => c.status === '등록완료').length;
+    const rate = total > 0 ? Math.round((registered / total) * 100) : 0;
+    return { total, registered, rate };
+  };
+  const managerStats = HAKJEOM_MANAGERS.map(name => {
+    const all = consultations.filter(c => c.manager === name);
+    const recent30 = [...all]
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      .slice(0, 30);
+    return { name, overall: calcRegRate(all), recent: calcRegRate(recent30) };
+  });
+  const hakjeomAll = consultations.filter(c => c.manager && HAKJEOM_MANAGERS.includes(c.manager));
+  const hakjeomRecent30 = [...hakjeomAll]
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 30);
+  const hakjeomStats = { overall: calcRegRate(hakjeomAll), recent: calcRegRate(hakjeomRecent30) };
+
   const goToPage = (page: number) => {
     setCurrentPage(page);
     setSelectedIds([]);
@@ -991,20 +1014,16 @@ export default function AdminPage() {
   // 관리자 대시보드
   return (
     <div className={styles.container}>
+      <button onClick={handleLogout} className={styles.logoutFloating}>로그아웃</button>
       <header className={styles.header}>
         <h1 className={styles.title}>상담 신청 관리 ({filteredConsultations.length}건)</h1>
-        
-        {/* 필터 영역 */}
         <div className={styles.filterRow}>
           <div className={styles.filterGroup}>
             <input
               type="text"
               placeholder="이름, 연락처, 취득사유, 메모 검색..."
               value={searchText}
-              onChange={(e) => {
-                setSearchText(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => { setSearchText(e.target.value); setCurrentPage(1); }}
               className={styles.searchInput}
             />
           </div>
@@ -1012,10 +1031,7 @@ export default function AdminPage() {
             <input
               type="date"
               value={startDate}
-              onChange={(e) => {
-                setStartDate(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => { setStartDate(e.target.value); setCurrentPage(1); }}
               className={styles.dateInput}
             />
           </div>
@@ -1024,74 +1040,62 @@ export default function AdminPage() {
             <input
               type="date"
               value={endDate}
-              onChange={(e) => {
-                setEndDate(e.target.value);
-                setCurrentPage(1);
-              }}
+              onChange={(e) => { setEndDate(e.target.value); setCurrentPage(1); }}
               className={styles.dateInput}
             />
           </div>
           {(searchText || statusFilter !== 'all' || managerFilter !== 'all' || majorCategoryFilter !== 'all' || minorCategoryFilter !== 'all' || reasonFilter !== 'all' || counselCheckFilter !== 'all' || startDate || endDate) && (
             <button
-              onClick={() => {
-                setSearchText('');
-                setStatusFilter('all');
-                setManagerFilter('all');
-                setMajorCategoryFilter('all');
-                setMinorCategoryFilter('all');
-                setReasonFilter('all');
-                setCounselCheckFilter('all');
-                setStartDate('');
-                setEndDate('');
-                setCurrentPage(1);
-              }}
+              onClick={() => { setSearchText(''); setStatusFilter('all'); setManagerFilter('all'); setMajorCategoryFilter('all'); setMinorCategoryFilter('all'); setReasonFilter('all'); setCounselCheckFilter('all'); setStartDate(''); setEndDate(''); setCurrentPage(1); }}
               className={styles.clearFilterButton}
             >
               필터 초기화
             </button>
           )}
         </div>
-
         <div className={styles.headerActions}>
-          <button onClick={() => setShowAddModal(true)} className={styles.addButton}>
-            추가
-          </button>
+          <button onClick={() => setShowAddModal(true)} className={styles.addButton}>추가</button>
           {selectedIds.length === 1 && (
-            <button onClick={openEditModal} className={styles.editButton}>
-              수정
-            </button>
+            <button onClick={openEditModal} className={styles.editButton}>수정</button>
           )}
           {selectedIds.length > 0 && (
-            <button onClick={handleBulkDelete} className={styles.deleteButton}>
-              삭제 ({selectedIds.length})
-            </button>
+            <button onClick={handleBulkDelete} className={styles.deleteButton}>삭제 ({selectedIds.length})</button>
           )}
           <button onClick={handleExcelDownload} className={styles.excelButton}>
             {selectedIds.length > 0 ? `선택 항목 다운로드 (${selectedIds.length})` : '엑셀 다운로드'}
           </button>
-          <button onClick={fetchConsultations} className={styles.refreshButton}>
-            새로고침
-          </button>
-          <button onClick={handleLogout} className={styles.logoutButton}>
-            로그아웃
-          </button>
+        </div>
+        <div className={styles.statsTable}>
+          <div className={styles.statsHeader}>
+            <span className={styles.statsColName} />
+            <span className={styles.statsColLabel}>최근 30건</span>
+            <span className={styles.statsColLabel}>전체</span>
+          </div>
+          <div className={`${styles.statsRow} ${styles.statsRowGroup}`}>
+            <span className={styles.statsName}>학점사업부</span>
+            <div className={styles.statsCell}>
+              <span className={styles.statsRate}>{hakjeomStats.recent.rate}%</span>
+            </div>
+            <div className={styles.statsCell}>
+              <span className={styles.statsRate}>{hakjeomStats.overall.rate}%</span>
+            </div>
+          </div>
+          {managerStats.map(m => (
+            <div key={m.name} className={styles.statsRow}>
+              <span className={styles.statsName}>{m.name}</span>
+              <div className={styles.statsCell}>
+                <span className={styles.statsRate}>{m.recent.rate}%</span>
+              </div>
+              <div className={styles.statsCell}>
+                <span className={styles.statsRate}>{m.overall.rate}%</span>
+              </div>
+            </div>
+          ))}
         </div>
       </header>
 
-      {/* 탭 네비게이션 */}
-      <div className={styles.tabNav}>
-        <button
-          className={`${styles.tabBtn} ${activeTab === 'consultations' ? styles.tabBtnActive : ''}`}
-          onClick={() => setActiveTab('consultations')}
-        >상담 관리</button>
-        <button
-          className={`${styles.tabBtn} ${activeTab === 'tracking' ? styles.tabBtnActive : ''}`}
-          onClick={() => setActiveTab('tracking')}
-        >추적링크 관리</button>
-      </div>
-
-      {/* 추적링크 탭 */}
-      {activeTab === 'tracking' && (
+      {/* 추적링크 탭 (숨김) */}
+      {false && (
         <div className={styles.trackingContainer}>
           {cafesLoading && <div className={styles.loading}>로딩 중...</div>}
           <div className={styles.trackingToolbar}>
@@ -1249,11 +1253,12 @@ export default function AdminPage() {
         </div>
       )}
 
-      {activeTab === 'consultations' && (loading ? (
+      {(loading ? (
         <div className={styles.loading}>로딩 중...</div>
       ) : error ? (
         <div className={styles.errorMessage}>{error}</div>
       ) : (
+        <>
         <div className={styles.tableContainer}>
           <table className={styles.table}>
             <thead>
@@ -1495,6 +1500,7 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+        </>
       ))}
 
       {/* 수동 추가 모달 */}

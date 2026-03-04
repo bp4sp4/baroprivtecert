@@ -106,7 +106,6 @@
   display: flex;
   gap: 12px;
   align-items: center;
-  
   margin-right: 12px;
   flex-wrap: wrap;
 }
@@ -145,6 +144,26 @@
 }
 
 .logoutButton:hover {
+  background: #fee;
+}
+
+.logoutFloating {
+  position: fixed;
+  top: 16px;
+  right: 20px;
+  z-index: 100;
+  padding: 7px 14px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  cursor: pointer;
+  border: 1px solid #fdd;
+  background: white;
+  color: #f04452;
+  transition: all 0.2s;
+}
+
+.logoutFloating:hover {
   background: #fee;
 }
 
@@ -960,8 +979,15 @@
 /* 탭 네비게이션 */
 .tabNav {
   display: flex;
+  align-items: center;
+  justify-content: flex-start;
   gap: 8px;
-  margin-bottom: 16px;
+  margin-bottom: 8px;
+}
+
+.tabBtns {
+  display: flex;
+  gap: 6px;
 }
 
 .tabBtn {
@@ -1443,4 +1469,109 @@
   background-size: 10px 8px;
   background-repeat: no-repeat;
   background-position: center;
+}
+
+/* 등록률 통계 */
+.statsTable {
+  margin-left: auto;
+  display: inline-flex;
+  flex-direction: column;
+  gap: 2px;
+  background: #fff;
+  border: 1px solid #e5e8eb;
+  border-radius: 10px;
+  overflow: hidden;
+  min-width: 300px;
+}
+
+.statsHeader {
+  display: grid;
+  grid-template-columns: 88px 1fr 1fr;
+  padding: 5px 12px;
+  background: #f4f6f8;
+  border-bottom: 1px solid #e5e8eb;
+  
+}
+
+.statsColName {
+  display: block;
+}
+
+.statsColLabel {
+  font-size: 10px;
+  font-weight: 600;
+  color: #8b95a1;
+  text-align: center;
+  padding-left: 4px;
+}
+
+.statsRow {
+  display: grid;
+  grid-template-columns: 88px 1fr 1fr;
+  align-items: center;
+  padding: 7px 12px;
+  border-top: 1px solid #f2f4f6;
+  gap: 8px;
+}
+
+.statsRowGroup {
+  
+  border-top: none;
+}
+
+.statsName {
+  font-size: 12px;
+  font-weight: 700;
+  color: #191f28;
+}
+
+.statsRowGroup .statsName {
+  color: #1b64da;
+}
+
+.statsCell {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  
+  justify-content: center;
+}
+
+.statsRate {
+  font-size: 13px;
+  font-weight: 800;
+  color: #3182f6;
+  min-width: 34px;
+  letter-spacing: -0.3px;
+}
+
+.statsRowGroup .statsRate {
+  color: #1b64da;
+}
+
+.statsCount {
+  font-size: 10px;
+  color: #b0b8c1;
+  min-width: 40px;
+}
+
+.statBar {
+  flex: 1;
+  height: 4px;
+  background: #e5e8eb;
+  border-radius: 99px;
+  overflow: hidden;
+  min-width: 40px;
+}
+
+.statBarFill {
+  height: 100%;
+  background: #3182f6;
+  border-radius: 99px;
+  transition: width 0.4s ease;
+  min-width: 2px;
+}
+
+.statsRowGroup .statBarFill {
+  background: #1b64da;
 }
