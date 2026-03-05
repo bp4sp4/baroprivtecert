@@ -24,7 +24,15 @@
       "Bash(cd /Users/korhrd/Documents/GitHub/korhrdprivatecert && git pull --rebase && git push)",
       "Bash(git add app/admin/private-cert/page.tsx app/page.tsx && git commit -m \"feat: add 대분류/중분류 columns to 민간자격증 admin\n\nCo-Authored-By: Claude Sonnet 4.6 <noreply@anthropic.com>\" && git push)",
       "Bash(cd /Users/korhrd/Documents/GitHub/korhrdprivatecert && git remote set-url origin https://github.com/bp4sp4/baroprivtecert && git remote -v)",
-      "Bash(git push -u origin main 2>&1)"
+      "Bash(git push -u origin main 2>&1)",
+      "Bash(find /Users/korhrd/Documents/GitHub/korhrdprivatecert -type f -name \"*.prisma\" -o -name \"schema.prisma\" 2>/dev/null | grep -v node_modules)",
+      "Bash(find /Users/korhrd/Documents/GitHub/korhrdprivatecert -type d -name \"*admin*\" -o -type d -name \"*private*\" 2>/dev/null | grep -v node_modules)",
+      "Bash(find /Users/korhrd/Documents/GitHub/korhrdprivatecert -type f -name \"*.ts\" -o -name \"*.tsx\" 2>/dev/null | grep -v node_modules | xargs grep -l \"major_category\\\\|major.category\" 2>/dev/null)",
+      "Bash(find /Users/korhrd/Documents/GitHub/korhrdprivatecert -type f \\\\\\( -name \"*.sql\" -o -name \"*.md\" -o -name \"migration*\" -o -name \"schema*\" \\\\\\) 2>/dev/null | grep -v node_modules)",
+      "Bash(find /Users/korhrd/Documents/GitHub/korhrdprivatecert -type f -name \"supabase*\" -o -name \"migrations*\" 2>/dev/null | grep -v node_modules)",
+      "Bash(find /Users/korhrd/Documents/GitHub/korhrdprivatecert -type f -name \"*.ts\" -o -name \"*.tsx\" 2>/dev/null | grep -v node_modules | xargs grep -l \"private_cert_consultations\\\\|바로폼\" 2>/dev/null)",
+      "Bash(cd /Users/korhrd/Documents/GitHub/korhrdsocial && npx tsc --noEmit 2>&1 | head -30)",
+      "Bash(npx tsc --noEmit --project /Users/korhrd/Documents/GitHub/korhrdsocial/tsconfig.json 2>&1 | head -30)"
     ]
   }
 }
